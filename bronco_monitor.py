@@ -11,7 +11,10 @@ CHAT_ID = os.environ["CHAT_ID"]
 def send_telegram(message):
     requests.post(
         f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-        data={"chat_id": CHAT_ID, "text": message},
+        data={
+            "chat_id": CHAT_ID,
+            "text": message
+        },
         timeout=20
     )
 
@@ -26,23 +29,27 @@ def check_stock():
 
     soup = BeautifulSoup(response.text, "html.parser")
 
-    available = {}
+    sizes = {}
 
     for size in ["M", "L"]:
-        found = False
+        available = False
 
-        for element in soup.find_all(string=lambda text: text and text.strip() == size):
+        for element in soup.find_all(
+            string=lambda text: text and text.strip() == size
+        ):
             parent = element.parent.parent
-
             html = str(parent)
 
-            if "line-through" not in html and "text-decoration:line-through" not in html:
-                found = True
+            if (
+                "line-through" not in html
+                and "text-decoration:line-through" not in html
+            ):
+                available = True
                 break
 
-        available[size] = found
+        sizes[size] = available
 
-    return available["M"], available["L"]
+    return sizes["M"], sizes["L"]
 
 
 try:
@@ -56,7 +63,7 @@ try:
             "Batman Compression Tshirt\n"
             "✅ M available\n"
             "✅ L available\n\n"
-            f"{URL}"
+            + URL
         )
 
 except Exception as e:
